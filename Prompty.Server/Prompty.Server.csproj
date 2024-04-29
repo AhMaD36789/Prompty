@@ -7,10 +7,11 @@
 		<SpaRoot>..\prompty.client</SpaRoot>
 		<SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
 		<SpaProxyServerUrl>https://localhost:5173</SpaProxyServerUrl>
+		<UserSecretsId>f93a7190-e2ca-475a-886f-1b5da95d68bb</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.16" />
+		<PackageReference Include="Forge.OpenAI" Version="1.4.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.18" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.18" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.15" />
@@ -35,9 +36,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\prompty.client\prompty.client.esproj">
-			<ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-		</ProjectReference>
+	  <Compile Update="Properties\Resources.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resources.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resources.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 </Project>

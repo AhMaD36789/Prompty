@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Prompty.Server.Models.Interfaces;
-using Prompty.Server.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using Forge.OpenAI.Interfaces.Services;
+using Forge.OpenAI.Models.ChatCompletions;
 
 namespace Prompty.Server.Controllers
 {
@@ -9,52 +8,49 @@ namespace Prompty.Server.Controllers
     [Route("[controller]")]
     public class OpenAIController : ControllerBase
     {
-        private readonly IOpenAIService _openAIService;
+        private readonly IOpenAIService _openAi;
 
-        public OpenAIController(IOpenAIService openAIService)
+        public OpenAIController(IOpenAIService openAi)
         {
-            _openAIService = openAIService;
+            _openAi = openAi;
         }
 
         [HttpPost("gen")]
-        public async Task<IActionResult> Generate([FromBody] PromptHistory promptHistory)
+        public async Task<IEnumerable<string>> Generate([FromBody] string userInput)
         {
-            if (promptHistory == null || !promptHistory.PromptHistoryItems.Any())
-            {
-                return BadRequest("Input list cannot be empty");
-            }
+            var results = new List<string>();
 
             try
             {
-                var response = await _openAIService.GenerateResponseAsync(promptHistory);
-                return Ok(new { prompt = response });
+                var request = new ChatCompletionRequest(ChatMessage.CreateFromUser(userInput));
+                // Set request parameters if needed
+
+                await foreach (var response in _openAi.ChatCompletionService.GetStreamAsync(request, CancellationToken.None))
+                {
+                    if (response.IsSuccess)
+                    {
+                        results.Add(response.Result?.Choices[0].Delta.Content);
+                    }
+                    else
+                    {
+                        // Handle error response differently
+                        results.Add($"Error: {response.ErrorMessage}");
+                    }
+                }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                // Handle potential errors during API call
-                return StatusCode(500, "Internal server error");
+                results.Add($"Internal server error: {ex.Message}");
             }
+
+            return results;
         }
+
 
         [HttpPost("hue")]
-        public async Task<IActionResult> Hue([FromBody] Prompt prompt)
+        public async Task<IActionResult> Hue(string a)
         {
-            if (prompt == null)
-            {
-                return BadRequest("Prompt cannot be empty");
-            }
-
-            try
-            {
-                var response = await _openAIService.HueResponseAsync(prompt);
-                return Ok(new { prompt = response });
-            }
-            catch (Exception e)
-            {
-                // Handle potential errors during API call
-                return StatusCode(500, "Internal server error");
-            }
+            throw new NotImplementedException();
         }
     }
-
 }
