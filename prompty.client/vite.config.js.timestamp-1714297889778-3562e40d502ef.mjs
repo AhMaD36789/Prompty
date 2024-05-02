@@ -34,7 +34,7 @@ var vite_config_default = defineConfig({
   },
   server: {
     proxy: {
-      "^/weatherforecast": {
+      "^/gen": {
         target,
         secure: false
       }

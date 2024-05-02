@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Forge.OpenAI.Interfaces.Services;
-using Forge.OpenAI.Models.ChatCompletions;
+using Prompty.Server.Models;
+using Prompty.Server.Models.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Prompty.Server.Controllers
 {
@@ -15,42 +19,24 @@ namespace Prompty.Server.Controllers
             _openAi = openAi;
         }
 
-        [HttpPost("gen")]
-        public async Task<IEnumerable<string>> Generate([FromBody] string userInput)
+        [HttpPost("generate")]
+        public async Task<ActionResult<IEnumerable<string>>> Generate([FromBody] Prompt promptRequest)
         {
-            var results = new List<string>();
-
             try
             {
-                var request = new ChatCompletionRequest(ChatMessage.CreateFromUser(userInput));
-                // Set request parameters if needed
-
-                await foreach (var response in _openAi.ChatCompletionService.GetStreamAsync(request, CancellationToken.None))
-                {
-                    if (response.IsSuccess)
-                    {
-                        results.Add(response.Result?.Choices[0].Delta.Content);
-                    }
-                    else
-                    {
-                        // Handle error response differently
-                        results.Add($"Error: {response.ErrorMessage}");
-                    }
-                }
+                string systemPrompt = await System.IO.File.ReadAllTextAsync("./gen.txt");
+                Console.WriteLine(systemPrompt);
+                var responses = await _openAi.GenerateResponsesAsync(systemPrompt, promptRequest.UserPrompt);
+                return Ok(responses);
+            }
+            catch (FileNotFoundException ex)
+            {
+                return NotFound($"System prompt file not found: {ex.Message}");
             }
             catch (Exception ex)
             {
-                results.Add($"Internal server error: {ex.Message}");
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-
-            return results;
-        }
-
-
-        [HttpPost("hue")]
-        public async Task<IActionResult> Hue(string a)
-        {
-            throw new NotImplementedException();
         }
     }
 }

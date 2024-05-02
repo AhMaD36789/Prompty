@@ -1,9 +1,10 @@
-﻿namespace Prompty.Server.Models.Interfaces
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Prompty.Server.Models.Interfaces
 {
     public interface IOpenAIService
     {
-        Task<string> GenerateResponseAsync(PromptHistory promptHistory);
-        Task<string> HueResponseAsync(Prompt prompt);
+        Task<IEnumerable<string>> GenerateResponsesAsync(string systemPrompt, string userPrompt);
     }
-
 }
