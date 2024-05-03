@@ -25,8 +25,10 @@ export function ChatBody() {
         prompt_history: updatedChatHistory // Use the updated chat history including the user's message
       };
 
+      console.log("Sending request with body:", requestBody);
+
       try {
-          const response = await axios.post('https://localhost:7162/gen', requestBody, {
+          const response = await axios.post('https://localhost:7162/openai/generate', requestBody, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -102,7 +104,7 @@ export function ChatBody() {
     };
   
     try {
-        const response = await axios.post('https://localhost:7162/hue', requestBody, {
+        const response = await axios.post('https://localhost:7162/openai/hue', requestBody, {
         headers: {
           'Content-Type': 'application/json'
         }
